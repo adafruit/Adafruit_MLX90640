@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+
+#if 0 // we dont be using the mbed layer!
+
 #include "mbed.h"
 #include "MLX90640_I2C_Driver.h"
 
@@ -105,3 +108,5 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
     return 0;
 }
 
+
+#endif

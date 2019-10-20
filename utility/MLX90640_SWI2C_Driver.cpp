@@ -24,6 +24,8 @@
  * ‘freqCnt’ argument should be changed – lower value results in 
  * higher frequency.
  */
+
+#if 0 // we dont be using the mbed layer!
  
 #include "mbed.h"
 #include "MLX90640_I2C_Driver.h"
@@ -330,4 +332,4 @@ int I2CReceiveAck(void)
     return ack;    
 }  
 
-     
+#endif
