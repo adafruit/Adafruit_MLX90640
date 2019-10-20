@@ -18,6 +18,8 @@
 #include <MLX90640_API.h>
 #include <math.h>
 
+namespace Adafruit_MLX90640 {
+
 void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
 void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
 void ExtractGainParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
@@ -1444,3 +1446,5 @@ int IsPixelBad(uint16_t pixel,paramsMLX90640 *params)
 }     
 
 //------------------------------------------------------------------------------
+
+}
