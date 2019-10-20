@@ -24,6 +24,15 @@
 
 #define MLX90640_I2CADDR_DEFAULT 0x33
 
+#define MLX90640_DEVICEID1 0x2407
+
+
+typedef enum mlx90640_mode {
+  MLX90640_INTERLEAVED,
+  MLX90640_CHESS,
+} mlx90640_mode_t;
+
+
 /*!
  *    @brief  Class that stores state and functions for interacting with
  *            the MLX90640 sensor
@@ -34,18 +43,14 @@ class Adafruit_MLX90640 {
     boolean begin(uint8_t i2c_addr = MLX90640_I2CADDR_DEFAULT,
 		  TwoWire *wire = &Wire);
 
-    int getCurrMode() {
-      return MLX90640_GetCurMode(MLX90640_I2CADDR_DEFAULT);
-    }
+    void setCurrMode(mlx90640_mode_t mode);
+    mlx90640_mode_t getCurrMode(void);
+
+    uint16_t serialNumber[3];
  private:
-    
     int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, 
-			 uint16_t nMemAddressRead, uint16_t *data) 
-    { return 0; }
-    int MLX90640_I2CWrite(uint8_t slaveAddr,uint16_t writeAddress, uint16_t data) 
-    { return 0; }
-
-
+			 uint16_t nMemAddressRead, uint16_t *data);
+    int MLX90640_I2CWrite(uint8_t slaveAddr,uint16_t writeAddress, uint16_t data);
 
     Adafruit_I2CDevice *i2c_dev;
 
@@ -65,7 +70,5 @@ class Adafruit_MLX90640 {
     int MLX90640_SetInterleavedMode(uint8_t slaveAddr);
     int MLX90640_SetChessMode(uint8_t slaveAddr);
     void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsMLX90640 *params);
-
-
 };
 #endif
