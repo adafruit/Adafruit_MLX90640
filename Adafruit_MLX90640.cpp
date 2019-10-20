@@ -66,14 +66,23 @@ int Adafruit_MLX90640::MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddres
 
 
 
-mlx90640_mode_t Adafruit_MLX90640::getCurrMode(void) {
+mlx90640_mode_t Adafruit_MLX90640::getMode(void) {
   return (mlx90640_mode_t)MLX90640_GetCurMode(0);
 }
 
-void Adafruit_MLX90640::setCurrMode(mlx90640_mode_t mode) {
+void Adafruit_MLX90640::setMode(mlx90640_mode_t mode) {
   if (mode == MLX90640_CHESS) {
     MLX90640_SetChessMode(0);
   } else {
     MLX90640_SetInterleavedMode(0);
   }
+}
+
+
+mlx90640_resolution_t Adafruit_MLX90640::getResolution(void) {
+  return (mlx90640_resolution_t)MLX90640_GetCurResolution(0);
+}
+
+void Adafruit_MLX90640::setResolution(mlx90640_resolution_t res) {
+  MLX90640_SetResolution(0, (int)res);
 }

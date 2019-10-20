@@ -32,6 +32,13 @@ typedef enum mlx90640_mode {
   MLX90640_CHESS,
 } mlx90640_mode_t;
 
+typedef enum mlx90640_res {
+  MLX90640_ADC_16BIT,
+  MLX90640_ADC_17BIT,
+  MLX90640_ADC_18BIT,
+  MLX90640_ADC_19BIT,
+} mlx90640_resolution_t;
+
 
 /*!
  *    @brief  Class that stores state and functions for interacting with
@@ -43,8 +50,11 @@ class Adafruit_MLX90640 {
     boolean begin(uint8_t i2c_addr = MLX90640_I2CADDR_DEFAULT,
 		  TwoWire *wire = &Wire);
 
-    void setCurrMode(mlx90640_mode_t mode);
-    mlx90640_mode_t getCurrMode(void);
+    void setMode(mlx90640_mode_t mode);
+    mlx90640_mode_t getMode(void);
+
+    mlx90640_resolution_t getResolution(void);
+    void setResolution(mlx90640_resolution_t res);
 
     uint16_t serialNumber[3];
  private:
