@@ -39,6 +39,17 @@ typedef enum mlx90640_res {
   MLX90640_ADC_19BIT,
 } mlx90640_resolution_t;
 
+typedef enum mlx90640_refreshrate {
+  MLX90640_0_5_HZ,
+  MLX90640_1_HZ,
+  MLX90640_2_HZ,
+  MLX90640_4_HZ,
+  MLX90640_8_HZ,
+  MLX90640_16_HZ,
+  MLX90640_32_HZ,
+  MLX90640_64_HZ,
+} mlx90640_refreshrate_t;
+
 
 /*!
  *    @brief  Class that stores state and functions for interacting with
@@ -50,11 +61,12 @@ class Adafruit_MLX90640 {
     boolean begin(uint8_t i2c_addr = MLX90640_I2CADDR_DEFAULT,
 		  TwoWire *wire = &Wire);
 
-    void setMode(mlx90640_mode_t mode);
     mlx90640_mode_t getMode(void);
-
+    void setMode(mlx90640_mode_t mode);
     mlx90640_resolution_t getResolution(void);
     void setResolution(mlx90640_resolution_t res);
+    mlx90640_refreshrate_t getRefreshRate(void);
+    void setRefreshRate(mlx90640_refreshrate_t res);
 
     uint16_t serialNumber[3];
  private:

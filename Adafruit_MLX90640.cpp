@@ -86,3 +86,11 @@ mlx90640_resolution_t Adafruit_MLX90640::getResolution(void) {
 void Adafruit_MLX90640::setResolution(mlx90640_resolution_t res) {
   MLX90640_SetResolution(0, (int)res);
 }
+
+mlx90640_refreshrate_t Adafruit_MLX90640::getRefreshRate(void) {
+  return (mlx90640_refreshrate_t)MLX90640_GetRefreshRate(0);
+}
+
+void Adafruit_MLX90640::setRefreshRate(mlx90640_refreshrate_t rate) {
+  MLX90640_SetRefreshRate(0, (int)rate);
+}
