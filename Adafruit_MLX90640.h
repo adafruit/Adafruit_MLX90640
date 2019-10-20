@@ -50,6 +50,8 @@ typedef enum mlx90640_refreshrate {
   MLX90640_64_HZ,
 } mlx90640_refreshrate_t;
 
+#define OPENAIR_TA_SHIFT 8
+
 
 /*!
  *    @brief  Class that stores state and functions for interacting with
@@ -68,6 +70,8 @@ class Adafruit_MLX90640 {
     mlx90640_refreshrate_t getRefreshRate(void);
     void setRefreshRate(mlx90640_refreshrate_t res);
 
+    int getFrame(float *framebuf);
+
     uint16_t serialNumber[3];
  private:
     int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, 
@@ -75,6 +79,7 @@ class Adafruit_MLX90640 {
     int MLX90640_I2CWrite(uint8_t slaveAddr,uint16_t writeAddress, uint16_t data);
 
     Adafruit_I2CDevice *i2c_dev;
+    paramsMLX90640 _params;
 
     int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
     int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
