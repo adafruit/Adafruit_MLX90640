@@ -41,7 +41,7 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress
   uint8_t cmd[2];
   
   while (nMemAddressRead > 0) {
-    uint16_t toRead16 = min(nMemAddressRead, i2c_dev->maxBufferSize()/2);
+    uint16_t toRead16 = min(nMemAddressRead, (uint16_t)i2c_dev->maxBufferSize()/2);
 
     cmd[0] = startAddress >> 8;
     cmd[1] = startAddress & 0x00FF;
@@ -138,7 +138,7 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
       return status;
     }
 
-    tr = MLX90640_GetTa(mlx90640Frame, &_params) - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8°C.  
+    tr = MLX90640_GetTa(mlx90640Frame, &_params) - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8 degC.  
     
     MLX90640_CalculateTo(mlx90640Frame, &_params, emissivity, tr, framebuf);
   }
