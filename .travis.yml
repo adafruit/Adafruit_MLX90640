@@ -18,7 +18,6 @@ install:
    - arduino --install-library "Adafruit BusIO"
 
 script:
-   - python run-clang-format.py -r .
    - build_main_platforms
 
 # Generate and deploy documentation
