@@ -2,7 +2,7 @@
 
 
 /*!
- *    @brief  Instantiates a new MPU6050 class
+ *    @brief  Instantiates a new MLX90640 class
  */
 Adafruit_MLX90640::Adafruit_MLX90640(void) {
 
@@ -22,7 +22,7 @@ boolean Adafruit_MLX90640::begin(uint8_t i2c_addr, TwoWire *wire) {
   if (!i2c_dev->begin()) {
     return false;
   }
-  
+  wire->setClock(400000); // Speed it up, lots to read :)
   MLX90640_I2CRead(0, MLX90640_DEVICEID1, 3, serialNumber);
 
   uint16_t eeMLX90640[832];
@@ -45,7 +45,7 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress
 
     cmd[0] = startAddress >> 8;
     cmd[1] = startAddress & 0x00FF;
-    Serial.printf("Reading %d words\n", toRead16);
+    //Serial.printf("Reading %d words\n", toRead16);
     if (! i2c_dev->write_then_read(cmd, 2, (uint8_t *)data, toRead16*2, false)) {
       return -1;
     }
@@ -66,19 +66,25 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress
 
 int Adafruit_MLX90640::MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data) {
   uint8_t cmd[4];
-  uint16_t dataCheck;
+  uint16_t dataCheck = 0;
 
   cmd[0] = writeAddress >> 8;
   cmd[1] = writeAddress & 0x00FF;
   cmd[2] = data >> 8;
   cmd[3] = data & 0x00FF;
 
-  if (! i2c_dev->write_then_read(cmd, 4, (uint8_t *)&dataCheck, 2, true)) {
+  if (! i2c_dev->write(cmd, 4, true)) {
     return -1;
   }
+  delay(1);
+
+  if (MLX90640_I2CRead(slaveAddr, writeAddress, 1, &dataCheck) != 0) {
+    return -1;
+  }
+
   // check echo
   if (dataCheck != data) {
-    return -1;
+    return -2;
   }
   // OK!
   return 0;
@@ -121,13 +127,20 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
   uint16_t mlx90640Frame[834];
   int status;
 
-  status = MLX90640_GetFrameData(0, mlx90640Frame);
-  if (status != 0) {
-    return status;
+  for (uint8_t page=0; page < 2; page++) {
+    status = MLX90640_GetFrameData(0, mlx90640Frame);
+    /*
+    for(int i=0; i<834; i++) {
+      Serial.printf("%x, ", mlx90640Frame[i]);
+    }
+    */
+    if (status < 0) {
+      return status;
+    }
+
+    tr = MLX90640_GetTa(mlx90640Frame, &_params) - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8°C.  
+    
+    MLX90640_CalculateTo(mlx90640Frame, &_params, emissivity, tr, framebuf);
   }
-
-  tr = MLX90640_GetTa(mlx90640Frame, &_params) - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8°C.  
-  MLX90640_CalculateTo(mlx90640Frame, &_params, emissivity, tr, framebuf);
-
   return 0;
 }
