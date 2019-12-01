@@ -3,6 +3,10 @@
 Adafruit_MLX90640 mlx;
 float frame[32*24]; // buffer for full frame of temperatures
 
+// uncomment *one* of the below
+//#define PRINT_TEMPERATURES
+#define PRINT_ASCIIART
+
 void setup() {
   while (!Serial) delay(10);
   Serial.begin(115200);
@@ -15,9 +19,11 @@ void setup() {
   }
   Serial.println("Found Adafruit MLX90640");
 
-  Serial.printf("Serial number 0x%04X%04X%04X\n",
-    mlx.serialNumber[0], mlx.serialNumber[1], mlx.serialNumber[2]);
-
+  Serial.print("Serial number: ");
+  Serial.print(mlx.serialNumber[0], HEX);
+  Serial.print(mlx.serialNumber[1], HEX);
+  Serial.println(mlx.serialNumber[2], HEX);
+  
   //mlx.setMode(MLX90640_INTERLEAVED);
   mlx.setMode(MLX90640_CHESS);
   Serial.print("Current mode: ");
@@ -58,11 +64,28 @@ void loop() {
     Serial.println("Failed");
     return;
   }
-  Serial.println("--------------------------------");
+  Serial.println();
+  Serial.println();
   for (uint8_t h=0; h<24; h++) {
     for (uint8_t w=0; w<32; w++) {
-      Serial.print(frame[h*32 + w], 1);
+      float t = frame[h*32 + w];
+#ifdef PRINT_TEMPERATURES
+      Serial.print(t, 1);
       Serial.print(", ");
+#endif
+#ifdef PRINT_ASCIIART
+      char c = '&';
+      if (t < 20) c = ' ';
+      else if (t < 23) c = '.';
+      else if (t < 25) c = '-';
+      else if (t < 27) c = '*';
+      else if (t < 29) c = '+';
+      else if (t < 31) c = 'x';
+      else if (t < 33) c = '%';
+      else if (t < 35) c = '#';
+      else if (t < 37) c = 'X';
+      Serial.print(c);
+#endif
     }
     Serial.println();
   }
