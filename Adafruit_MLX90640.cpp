@@ -22,13 +22,17 @@ boolean Adafruit_MLX90640::begin(uint8_t i2c_addr, TwoWire *wire) {
   if (!i2c_dev->begin()) {
     return false;
   }
-  wire->setClock(400000); // Speed it up, lots to read :)
+  //wire->setClock(400000); // Speed it up, lots to read :)
   MLX90640_I2CRead(0, MLX90640_DEVICEID1, 3, serialNumber);
 
   uint16_t eeMLX90640[832];
   if (MLX90640_DumpEE(0, eeMLX90640) != 0) {
     return false;
   }
+  for (int i=0; i<832; i++) {
+    Serial.printf("0x%x, ", eeMLX90640[i]);
+  }
+  Serial.println();
   if (MLX90640_ExtractParameters(eeMLX90640, &_params) != 0) {
     return false;
   }
@@ -129,17 +133,20 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
 
   for (uint8_t page=0; page < 2; page++) {
     status = MLX90640_GetFrameData(0, mlx90640Frame);
-    /*
+
+    Serial.printf("Page%d = [", page);
     for(int i=0; i<834; i++) {
-      Serial.printf("%x, ", mlx90640Frame[i]);
+      Serial.printf("0x%x, ", mlx90640Frame[i]);
     }
-    */
+    Serial.println("]");
+
     if (status < 0) {
       return status;
     }
 
     tr = MLX90640_GetTa(mlx90640Frame, &_params) - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8 degC.  
-    
+    Serial.print("Tr = "); Serial.println(tr, 8);
+
     MLX90640_CalculateTo(mlx90640Frame, &_params, emissivity, tr, framebuf);
   }
   return 0;

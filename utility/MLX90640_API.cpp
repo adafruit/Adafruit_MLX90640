@@ -59,6 +59,7 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
             return error;
         }    
         dataReady = statusRegister & 0x0008;
+	Serial.printf("ready status: 0x%x\n", dataReady);
     }       
         
     while(dataReady != 0 && cnt < 5)
@@ -68,7 +69,7 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
         {
             return error;
         }
-            
+        Serial.printf("Read frame %d\n", cnt);
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
         if(error != 0)
         {
@@ -81,11 +82,13 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
             return error;
         }    
         dataReady = statusRegister & 0x0008;
+	Serial.printf("frame ready: 0x%x\n", dataReady);
         cnt = cnt + 1;
     }
     
     if(cnt > 4)
     {
+      Serial.printf("TOO MANY RETRIES");
         return -8;
     }    
     
@@ -543,19 +546,24 @@ float Adafruit_MLX90640::MLX90640_GetTa(uint16_t *frameData, const paramsMLX9064
     float ta;
     
     vdd = MLX90640_GetVdd(frameData, params);
-    
+    Serial.print("vdd = "); Serial.println(vdd);
+
     ptat = frameData[800];
     if(ptat > 32767)
     {
         ptat = ptat - 65536;
     }
     
+    Serial.print("ptat = "); Serial.println(ptat);
     ptatArt = frameData[768];
     if(ptatArt > 32767)
     {
         ptatArt = ptatArt - 65536;
     }
     ptatArt = (ptat / (ptat * params->alphaPTAT + ptatArt)) * pow(2, (double)18);
+
+    Serial.print("ptatart = "); Serial.println(ptatArt);
+
     
     ta = (ptatArt / (1 + params->KvPTAT * (vdd - 3.3)) - params->vPTAT25);
     ta = ta / params->KtPTAT + 25;
@@ -693,6 +701,8 @@ void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     mlx90640->kVdd = kVdd;
     mlx90640->vdd25 = vdd25; 
+    Serial.print("kVdd: "); Serial.println(kVdd);
+    Serial.print("vdd25: "); Serial.println(vdd25);
 }
 
 //------------------------------------------------------------------------------
@@ -704,6 +714,7 @@ void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     int16_t vPTAT25;
     float alphaPTAT;
     
+
     KvPTAT = (eeData[50] & 0xFC00) >> 10;
     if(KvPTAT > 31)
     {
@@ -725,7 +736,11 @@ void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->KvPTAT = KvPTAT;
     mlx90640->KtPTAT = KtPTAT;    
     mlx90640->vPTAT25 = vPTAT25;
-    mlx90640->alphaPTAT = alphaPTAT;   
+    mlx90640->alphaPTAT = alphaPTAT;
+    Serial.print("KvPTAT: "); Serial.println(KvPTAT, 8);
+    Serial.print("KtPTAT: "); Serial.println(KtPTAT);
+    Serial.print("vPTAT25: "); Serial.println(vPTAT25);
+    Serial.print("alphaPTAT: "); Serial.println(alphaPTAT);
 }
 
 //------------------------------------------------------------------------------
@@ -740,7 +755,8 @@ void ExtractGainParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
         gainEE = gainEE -65536;
     }
     
-    mlx90640->gainEE = gainEE;    
+    mlx90640->gainEE = gainEE;
+    Serial.print("gainEE: "); Serial.println(gainEE);
 }
 
 //------------------------------------------------------------------------------
@@ -756,6 +772,7 @@ void ExtractTgcParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     tgc = tgc / 32.0f;
     
     mlx90640->tgc = tgc;        
+    Serial.print("tgc: "); Serial.println(tgc, 8);
 }
 
 //------------------------------------------------------------------------------
@@ -766,6 +783,7 @@ void ExtractResolutionParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     resolutionEE = (eeData[56] & 0x3000) >> 12;    
     
     mlx90640->resolutionEE = resolutionEE;
+    Serial.print("ResolutionEE: "); Serial.println(resolutionEE);
 }
 
 //------------------------------------------------------------------------------
@@ -781,6 +799,7 @@ void ExtractKsTaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     KsTa = KsTa / 8192.0f;
     
     mlx90640->KsTa = KsTa;
+    Serial.print("KsTa: "); Serial.println(KsTa, 8);
 }
 
 //------------------------------------------------------------------------------
@@ -819,6 +838,19 @@ void ExtractKsToParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     } 
     
     mlx90640->ksTo[4] = -0.0002;
+
+    Serial.print("KsTo: "); 
+    for (int i=0; i<5; i++) {
+      Serial.print(mlx90640->ksTo[i], 8);
+      Serial.print(", ");
+    }
+    Serial.println();
+    Serial.print("ct: "); 
+    for (int i=0; i<5; i++) {
+      Serial.print(mlx90640->ct[i]);
+      Serial.print(", ");
+    }
+    Serial.println();
 }
 
 //------------------------------------------------------------------------------
@@ -894,6 +926,13 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             alphaTemp[p] = SCALEALPHA/alphaTemp[p];
         }
     }
+
+    Serial.print("alphaTemp: "); 
+    for (int i=0; i<768; i++) {
+      Serial.print(alphaTemp[i], 8);
+      Serial.print(", ");
+    }
+    Serial.println();
     
     temp = alphaTemp[0];
     for(int i = 1; i < 768; i++)
@@ -903,6 +942,7 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             temp = alphaTemp[i];
         }
     }
+    Serial.print("Temp: "); Serial.println(temp);
     
     alphaScale = 0;
     while(temp < 32768)
@@ -917,9 +957,17 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
         mlx90640->alpha[i] = (temp + 0.5);        
         
     } 
-    
+
     mlx90640->alphaScale = alphaScale;      
    
+   
+    Serial.print("alpha: "); 
+    for (int i=0; i<768; i++) {
+      Serial.print(mlx90640->alpha[i]);
+      Serial.print(", ");
+    }
+    Serial.println(); 
+    Serial.print("alphascale: "); Serial.println(alphaScale);
 }
 
 //------------------------------------------------------------------------------
@@ -992,6 +1040,14 @@ void ExtractOffsetParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             mlx90640->offset[p] = (offsetRef + (occRow[i] << occRowScale) + (occColumn[j] << occColumnScale) + mlx90640->offset[p]);
         }
     }
+
+    Serial.print("offset: "); 
+    for (int i=0; i<768; i++) {
+      Serial.print(mlx90640->offset[i]);
+      Serial.print(", ");
+    }
+    Serial.println(); 
+
 }
 
 //------------------------------------------------------------------------------
@@ -1090,6 +1146,14 @@ void ExtractKtaPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     } 
     
     mlx90640->ktaScale = ktaScale1;           
+
+    Serial.print("kta: "); 
+    for (int i=0; i<768; i++) {
+      Serial.print(mlx90640->kta[i]);
+      Serial.print(", ");
+    }
+    Serial.println(); 
+    Serial.print("ktascale: "); Serial.println(ktaScale1);
 }
 
 
@@ -1182,6 +1246,16 @@ void ExtractKvPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     } 
     
     mlx90640->kvScale = kvScale;        
+
+
+    Serial.print("kv: "); 
+    for (int i=0; i<768; i++) {
+      Serial.print(mlx90640->kv[i]);
+      Serial.print(", ");
+    }
+    Serial.println(); 
+    Serial.print("kvscale: "); Serial.println(kvScale);
+
 }
 
 //------------------------------------------------------------------------------
@@ -1245,6 +1319,11 @@ void ExtractCPParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->cpAlpha[1] = alphaSP[1];
     mlx90640->cpOffset[0] = offsetSP[0];
     mlx90640->cpOffset[1] = offsetSP[1];  
+
+    Serial.print("cpAlpha: "); Serial.print(alphaSP[0], 12);
+    Serial.print(", ");  Serial.println(alphaSP[1], 12);
+    Serial.print("offsetSP: "); Serial.print(offsetSP[0]);
+    Serial.print(", ");  Serial.println(offsetSP[1]);
 }
 
 //------------------------------------------------------------------------------
@@ -1282,6 +1361,11 @@ void ExtractCILCParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->ilChessC[0] = ilChessC[0];
     mlx90640->ilChessC[1] = ilChessC[1];
     mlx90640->ilChessC[2] = ilChessC[2];
+
+    Serial.print("calibEE: "); Serial.println(calibrationModeEE);
+    Serial.print("ilChess: "); Serial.print(ilChessC[0]);
+    Serial.print(", ");  Serial.print(ilChessC[1]);
+    Serial.print(", ");  Serial.println(ilChessC[2]);
 }
 
 //------------------------------------------------------------------------------
