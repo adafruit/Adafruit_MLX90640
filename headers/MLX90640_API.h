@@ -20,7 +20,9 @@
 #include "Arduino.h"
 
 #define SCALEALPHA 0.000001
-    
+
+//#define MLX90640_DEBUG
+
 typedef struct
     {
         int16_t kVdd;

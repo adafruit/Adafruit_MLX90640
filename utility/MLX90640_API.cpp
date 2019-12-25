@@ -59,8 +59,10 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
             return error;
         }    
         dataReady = statusRegister & 0x0008;
+#ifdef MLX90640_DEBUG
 	Serial.printf("ready status: 0x%x\n", dataReady);
-    }       
+#endif
+    }
         
     while(dataReady != 0 && cnt < 5)
     { 
@@ -69,7 +71,9 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
         {
             return error;
         }
+#ifdef MLX90640_DEBUG
         Serial.printf("Read frame %d\n", cnt);
+#endif
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
         if(error != 0)
         {
@@ -82,13 +86,17 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
             return error;
         }    
         dataReady = statusRegister & 0x0008;
+#ifdef MLX90640_DEBUG
 	Serial.printf("frame ready: 0x%x\n", dataReady);
+#endif
         cnt = cnt + 1;
     }
     
     if(cnt > 4)
     {
+#ifdef MLX90640_DEBUG
       Serial.printf("TOO MANY RETRIES");
+#endif
         return -8;
     }    
     
@@ -546,7 +554,9 @@ float Adafruit_MLX90640::MLX90640_GetTa(uint16_t *frameData, const paramsMLX9064
     float ta;
     
     vdd = MLX90640_GetVdd(frameData, params);
+#ifdef MLX90640_DEBUG
     Serial.print("vdd = "); Serial.println(vdd);
+#endif
 
     ptat = frameData[800];
     if(ptat > 32767)
@@ -554,7 +564,9 @@ float Adafruit_MLX90640::MLX90640_GetTa(uint16_t *frameData, const paramsMLX9064
         ptat = ptat - 65536;
     }
     
+#ifdef MLX90640_DEBUG
     Serial.print("ptat = "); Serial.println(ptat);
+#endif
     ptatArt = frameData[768];
     if(ptatArt > 32767)
     {
@@ -562,8 +574,9 @@ float Adafruit_MLX90640::MLX90640_GetTa(uint16_t *frameData, const paramsMLX9064
     }
     ptatArt = (ptat / (ptat * params->alphaPTAT + ptatArt)) * pow(2, (double)18);
 
+#ifdef MLX90640_DEBUG
     Serial.print("ptatart = "); Serial.println(ptatArt);
-
+#endif
     
     ta = (ptatArt / (1 + params->KvPTAT * (vdd - 3.3)) - params->vPTAT25);
     ta = ta / params->KtPTAT + 25;
@@ -701,8 +714,10 @@ void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     mlx90640->kVdd = kVdd;
     mlx90640->vdd25 = vdd25; 
+#ifdef MLX90640_DEBUG
     Serial.print("kVdd: "); Serial.println(kVdd);
     Serial.print("vdd25: "); Serial.println(vdd25);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -737,10 +752,12 @@ void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->KtPTAT = KtPTAT;    
     mlx90640->vPTAT25 = vPTAT25;
     mlx90640->alphaPTAT = alphaPTAT;
+#ifdef MLX90640_DEBUG
     Serial.print("KvPTAT: "); Serial.println(KvPTAT, 8);
     Serial.print("KtPTAT: "); Serial.println(KtPTAT);
     Serial.print("vPTAT25: "); Serial.println(vPTAT25);
     Serial.print("alphaPTAT: "); Serial.println(alphaPTAT);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -756,7 +773,9 @@ void ExtractGainParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     
     mlx90640->gainEE = gainEE;
+#ifdef MLX90640_DEBUG
     Serial.print("gainEE: "); Serial.println(gainEE);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -772,7 +791,9 @@ void ExtractTgcParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     tgc = tgc / 32.0f;
     
     mlx90640->tgc = tgc;        
+#ifdef MLX90640_DEBUG
     Serial.print("tgc: "); Serial.println(tgc, 8);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -783,7 +804,9 @@ void ExtractResolutionParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     resolutionEE = (eeData[56] & 0x3000) >> 12;    
     
     mlx90640->resolutionEE = resolutionEE;
+#ifdef MLX90640_DEBUG
     Serial.print("ResolutionEE: "); Serial.println(resolutionEE);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -799,7 +822,9 @@ void ExtractKsTaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     KsTa = KsTa / 8192.0f;
     
     mlx90640->KsTa = KsTa;
+#ifdef MLX90640_DEBUG
     Serial.print("KsTa: "); Serial.println(KsTa, 8);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -839,6 +864,7 @@ void ExtractKsToParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     mlx90640->ksTo[4] = -0.0002;
 
+#ifdef MLX90640_DEBUG
     Serial.print("KsTo: "); 
     for (int i=0; i<5; i++) {
       Serial.print(mlx90640->ksTo[i], 8);
@@ -851,6 +877,7 @@ void ExtractKsToParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
       Serial.print(", ");
     }
     Serial.println();
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -926,14 +953,15 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             alphaTemp[p] = SCALEALPHA/alphaTemp[p];
         }
     }
-
+#ifdef MLX90640_DEBUG
     Serial.print("alphaTemp: "); 
     for (int i=0; i<768; i++) {
       Serial.print(alphaTemp[i], 8);
       Serial.print(", ");
     }
     Serial.println();
-    
+#endif
+
     temp = alphaTemp[0];
     for(int i = 1; i < 768; i++)
     {
@@ -942,7 +970,9 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             temp = alphaTemp[i];
         }
     }
+#ifdef MLX90640_DEBUG
     Serial.print("Temp: "); Serial.println(temp);
+#endif
     
     alphaScale = 0;
     while(temp < 32768)
@@ -960,7 +990,7 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 
     mlx90640->alphaScale = alphaScale;      
    
-   
+#ifdef MLX90640_DEBUG
     Serial.print("alpha: "); 
     for (int i=0; i<768; i++) {
       Serial.print(mlx90640->alpha[i]);
@@ -968,6 +998,7 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     Serial.println(); 
     Serial.print("alphascale: "); Serial.println(alphaScale);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1040,14 +1071,14 @@ void ExtractOffsetParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
             mlx90640->offset[p] = (offsetRef + (occRow[i] << occRowScale) + (occColumn[j] << occColumnScale) + mlx90640->offset[p]);
         }
     }
-
+#ifdef MLX90640_DEBUG
     Serial.print("offset: "); 
     for (int i=0; i<768; i++) {
       Serial.print(mlx90640->offset[i]);
       Serial.print(", ");
     }
     Serial.println(); 
-
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1147,6 +1178,7 @@ void ExtractKtaPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     mlx90640->ktaScale = ktaScale1;           
 
+#ifdef MLX90640_DEBUG
     Serial.print("kta: "); 
     for (int i=0; i<768; i++) {
       Serial.print(mlx90640->kta[i]);
@@ -1154,6 +1186,7 @@ void ExtractKtaPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     Serial.println(); 
     Serial.print("ktascale: "); Serial.println(ktaScale1);
+#endif
 }
 
 
@@ -1247,7 +1280,7 @@ void ExtractKvPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     mlx90640->kvScale = kvScale;        
 
-
+#ifdef MLX90640_DEBUG
     Serial.print("kv: "); 
     for (int i=0; i<768; i++) {
       Serial.print(mlx90640->kv[i]);
@@ -1255,7 +1288,7 @@ void ExtractKvPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     Serial.println(); 
     Serial.print("kvscale: "); Serial.println(kvScale);
-
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1320,10 +1353,12 @@ void ExtractCPParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->cpOffset[0] = offsetSP[0];
     mlx90640->cpOffset[1] = offsetSP[1];  
 
+#ifdef MLX90640_DEBUG
     Serial.print("cpAlpha: "); Serial.print(alphaSP[0], 12);
     Serial.print(", ");  Serial.println(alphaSP[1], 12);
     Serial.print("offsetSP: "); Serial.print(offsetSP[0]);
     Serial.print(", ");  Serial.println(offsetSP[1]);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1362,10 +1397,12 @@ void ExtractCILCParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->ilChessC[1] = ilChessC[1];
     mlx90640->ilChessC[2] = ilChessC[2];
 
+#ifdef MLX90640_DEBUG
     Serial.print("calibEE: "); Serial.println(calibrationModeEE);
     Serial.print("ilChess: "); Serial.print(ilChessC[0]);
     Serial.print(", ");  Serial.print(ilChessC[1]);
     Serial.print(", ");  Serial.println(ilChessC[2]);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1404,14 +1441,20 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     if(brokenPixCnt > 4)  
     {
+      Serial.print("Broken pixels: ");
+      Serial.println(brokenPixCnt);
         warn = -3;
     }         
     else if(outlierPixCnt > 4)  
     {
+      Serial.print("Outlier pixels: ");
+      Serial.println(outlierPixCnt);
         warn = -4;
     }
     else if((brokenPixCnt + outlierPixCnt) > 4)  
     {
+      Serial.print("Broken+outlier pixels: ");
+      Serial.println(brokenPixCnt + outlierPixCnt);
         warn = -5;
     } 
     else
@@ -1423,6 +1466,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
                 warn = CheckAdjacentPixels(mlx90640->brokenPixels[pixCnt],mlx90640->brokenPixels[i]);
                 if(warn != 0)
                 {
+		    Serial.println("Broken pixel has adjacent broken pixel");
                     return warn;
                 }    
             }    
@@ -1435,6 +1479,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
                 warn = CheckAdjacentPixels(mlx90640->outlierPixels[pixCnt],mlx90640->outlierPixels[i]);
                 if(warn != 0)
                 {
+		    Serial.println("Outlier pixel has adjacent outlier pixel");
                     return warn;
                 }    
             }    
@@ -1447,6 +1492,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
                 warn = CheckAdjacentPixels(mlx90640->brokenPixels[pixCnt],mlx90640->outlierPixels[i]);
                 if(warn != 0)
                 {
+		    Serial.println("Broken pixel has adjacent outlier pixel");
                     return warn;
                 }    
             }    
