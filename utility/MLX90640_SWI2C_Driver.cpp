@@ -14,21 +14,21 @@
  * limitations under the License.
  *
  */
- /**
+/**
  * As the timings depend heavily on the MCU in use, it is recommended
  * to make sure that the proper timings are achieved. For that purpose
  * an oscilloscope might be needed to strobe the SCL and SDA signals.
- * The Wait(int) function could be modified in order to better 
- * trim the frequency. For coarse setting of the frequency or 
- * dynamic frequency change using the default function implementation, 
- * ‘freqCnt’ argument should be changed – lower value results in 
+ * The Wait(int) function could be modified in order to better
+ * trim the frequency. For coarse setting of the frequency or
+ * dynamic frequency change using the default function implementation,
+ * ‘freqCnt’ argument should be changed – lower value results in
  * higher frequency.
  */
 
 #if 0 // we dont be using the mbed layer!
- 
-#include "mbed.h"
+
 #include "MLX90640_I2C_Driver.h"
+#include "mbed.h"
 
 
 DigitalInOut sda(p9);
@@ -38,10 +38,11 @@ DigitalOut scl(p10);
 #define HIGH 1;
 
 #define SCL_HIGH scl = HIGH;
-#define SCL_LOW scl = LOW;     
+#define SCL_LOW scl = LOW;
 #define SDA_HIGH sda.input();
-#define SDA_LOW sda.output(); \
-                sda = LOW;           
+#define SDA_LOW                                                                \
+  sda.output();                                                                \
+  sda = LOW;           
 
 int I2CSendByte(int8_t);
 void I2CReadBytes(int, char *);
@@ -330,6 +331,6 @@ int I2CReceiveAck(void)
     SDA_LOW;
     
     return ack;    
-}  
+}
 
 #endif

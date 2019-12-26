@@ -17,8 +17,8 @@
 
 #if 0 // we dont be using the mbed layer!
 
-#include "mbed.h"
 #include "MLX90640_I2C_Driver.h"
+#include "mbed.h"
 
 I2C i2c(p9, p10);
 
@@ -107,6 +107,5 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
     
     return 0;
 }
-
 
 #endif
