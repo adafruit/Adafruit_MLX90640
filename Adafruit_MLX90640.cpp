@@ -198,7 +198,7 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
 }
 
 /*!
- *    @brief  Return ambient temperature.
+ *    @brief  Return ambient temperature of the TO39 package.
  *    @param  newFrame If true, will also capture a new data frame. If false,
  * return the value from the last data frame read.
  *    @return Ambient temperature as a float in degrees Celsius.

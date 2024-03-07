@@ -73,7 +73,7 @@ public:
 
   int getFrame(float *framebuf);
 
-  float getTa(bool newFrame=true);
+  float getTa(bool newFrame = true);
 
   uint16_t serialNumber[3]; ///< Unique serial number read from device
 
