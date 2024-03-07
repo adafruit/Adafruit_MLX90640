@@ -23,14 +23,14 @@ void setup() {
   Serial.print(mlx.serialNumber[0], HEX);
   Serial.print(mlx.serialNumber[1], HEX);
   Serial.println(mlx.serialNumber[2], HEX);
-  
+
   //mlx.setMode(MLX90640_INTERLEAVED);
   mlx.setMode(MLX90640_CHESS);
   Serial.print("Current mode: ");
   if (mlx.getMode() == MLX90640_CHESS) {
     Serial.println("Chess");
   } else {
-    Serial.println("Interleave");    
+    Serial.println("Interleave");
   }
 
   mlx.setResolution(MLX90640_ADC_18BIT);
@@ -48,7 +48,7 @@ void setup() {
   mlx90640_refreshrate_t rate = mlx.getRefreshRate();
   switch (rate) {
     case MLX90640_0_5_HZ: Serial.println("0.5 Hz"); break;
-    case MLX90640_1_HZ: Serial.println("1 Hz"); break; 
+    case MLX90640_1_HZ: Serial.println("1 Hz"); break;
     case MLX90640_2_HZ: Serial.println("2 Hz"); break;
     case MLX90640_4_HZ: Serial.println("4 Hz"); break;
     case MLX90640_8_HZ: Serial.println("8 Hz"); break;
@@ -64,6 +64,10 @@ void loop() {
     Serial.println("Failed");
     return;
   }
+  Serial.println("===================================");
+  Serial.print("Ambient temperature = ");
+  Serial.print(mlx.getTa(false)); // false = no new frame capture
+  Serial.println(" degC");
   Serial.println();
   Serial.println();
   for (uint8_t h=0; h<24; h++) {
