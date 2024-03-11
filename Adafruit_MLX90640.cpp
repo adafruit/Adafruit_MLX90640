@@ -185,9 +185,9 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
       return status;
     }
 
-    tr = MLX90640_GetTa(mlx90640Frame, &_params) -
-         OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is -8
-                           // degC.
+    ta = MLX90640_GetTa(mlx90640Frame, &_params); // Store ambient temp locally
+    tr = ta - OPENAIR_TA_SHIFT; // For a MLX90640 in the open air the shift is
+                                // -8 degC.
 #ifdef MLX90640_DEBUG
     Serial.print("Tr = ");
     Serial.println(tr, 8);
@@ -195,4 +195,19 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
     MLX90640_CalculateTo(mlx90640Frame, &_params, emissivity, tr, framebuf);
   }
   return 0;
+}
+
+/*!
+ *    @brief  Return ambient temperature of the TO39 package.
+ *    @param  newFrame If true, will also capture a new data frame. If false,
+ * return the value from the last data frame read.
+ *    @return Ambient temperature as a float in degrees Celsius.
+ */
+float Adafruit_MLX90640::getTa(bool newFrame) {
+  if (!newFrame) {
+    return ta;
+  }
+  uint16_t mlx90640Frame[834];
+  MLX90640_GetFrameData(0, mlx90640Frame);
+  return MLX90640_GetTa(mlx90640Frame, &_params);
 }

@@ -73,6 +73,8 @@ public:
 
   int getFrame(float *framebuf);
 
+  float getTa(bool newFrame = true);
+
   uint16_t serialNumber[3]; ///< Unique serial number read from device
 
 private:
@@ -83,6 +85,7 @@ private:
 
   Adafruit_I2CDevice *i2c_dev;
   paramsMLX90640 _params;
+  float ta = -999.0;
 
   int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
   int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
