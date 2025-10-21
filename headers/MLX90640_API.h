@@ -52,6 +52,4 @@ typedef struct {
   uint16_t brokenPixels[5];
   uint16_t outlierPixels[5];
 } paramsMLX90640;
-
 #endif
-
