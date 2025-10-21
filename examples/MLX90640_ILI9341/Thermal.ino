@@ -53,7 +53,7 @@
 #define SD_CS 5
 #endif
 
-// Initialize display
+// Initialize the ILI9341 display
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 // Initialize thermal sensor
